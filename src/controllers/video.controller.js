@@ -114,7 +114,7 @@ const updateVideo = asyncHandler(async (req, res) => {
 
   const { title, description, thumbnail } = req.body;
 
-  if ([title, description].some((field) => field.trim()) === "") {
+  if ([title, description].some((field) => field.trim() === "")) {
     throw new ApiError(400, "All fields are required");
   }
 
