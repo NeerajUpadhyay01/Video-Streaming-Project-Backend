@@ -100,6 +100,10 @@ const getVideoById = asyncHandler(async (req, res) => {
 
   const video = await Video.findById(videoId);
 
+  if(!video){
+    throw new ApiError(404,"video not found")
+  }
+
   return res
     .status(200)
     .json(new ApiResponse(200, video, "video fetched successsfully"));
