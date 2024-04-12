@@ -49,7 +49,7 @@ try {
 const publishAVideo = asyncHandler(async (req, res) => {
   const { title, description } = req.body;
   // TODO: get video, upload to cloudinary, create video
-  if ([title, description].some((field) => field.trim()) === "") {
+  if ([title, description].some((field) => field.trim() === "")) {
     throw new ApiError(400, "All fields are required");
   }
 
