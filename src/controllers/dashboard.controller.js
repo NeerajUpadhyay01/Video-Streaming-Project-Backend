@@ -25,12 +25,12 @@ const getChannelStats = asyncHandler(async (req, res) => {
     },
   ]);
 
-let totalViews=0;
-for(const videoIndex in totalVideos){
-    totalViews+=totalVideos[videoIndex].views
-}
+  let totalViews = 0;
+  for (const videoIndex in totalVideos) {
+    totalViews += totalVideos[videoIndex].views;
+  }
 
-  const commentLikes = await Like.aggregate([
+  const comments = await Like.aggregate([
     {
       $match: {
         comment: { $exists: true }, // Filter only documents with the comment attribute
@@ -41,7 +41,7 @@ for(const videoIndex in totalVideos){
         from: "comments",
         localField: "comment",
         foreignField: "_id",
-        as: "commentLikes",
+        as: "commentLike",
         pipeline: [
           {
             $match: {
@@ -58,13 +58,14 @@ for(const videoIndex in totalVideos){
     },
     {
       $project: {
-        commentLikes: 1,
+        commentLike: 1,
         _id: 0,
       },
     },
   ]);
+  // console.log(comments);
 
-  const tweetLikes = await Like.aggregate([
+  const tweets = await Like.aggregate([
     {
       $match: {
         tweet: { $exists: true }, // Filter only documents with the tweet attribute
@@ -75,7 +76,7 @@ for(const videoIndex in totalVideos){
         from: "tweets",
         localField: "tweet",
         foreignField: "_id",
-        as: "tweetLikes",
+        as: "tweetLike",
         pipeline: [
           {
             $match: {
@@ -87,13 +88,13 @@ for(const videoIndex in totalVideos){
     },
     {
       $project: {
-        tweetLikes: 1,
+        tweetLike: 1,
         _id: 0,
       },
     },
   ]);
 
-  const videoLikes = await Like.aggregate([
+  const videos = await Like.aggregate([
     {
       $match: {
         video: { $exists: true }, // Filter only documents with the video attribute
@@ -104,7 +105,7 @@ for(const videoIndex in totalVideos){
         from: "videos",
         localField: "video",
         foreignField: "_id",
-        as: "videoLikes",
+        as: "videoLike",
         pipeline: [
           {
             $match: {
@@ -116,28 +117,48 @@ for(const videoIndex in totalVideos){
     },
     {
       $project: {
-        videoLikes: 1,
+        videoLike: 1,
         _id: 0,
       },
     },
   ]);
 
-  const stats={
-    username:req.user.username,
-    fullname:req.user.fullname,
-    avatar:req.user.avatar,
-    coverImage:req.user.coverImage,
-    totalViews:totalViews,
-    totalSubscribers:totalSubscribers.length,
-    totalVideos:totalVideos.length,
-    totalLikes:videoLikes.length + commentLikes.length +tweetLikes.length
+  let commentLikes = 0;
+  let videoLikes = 0;
+  let tweetLikes = 0;
+
+  for (const comment in comments) {
+    if (comments[comment].commentLike.length >0) {
+      commentLikes += 1;
+    }
   }
+  for (const tweet in tweets) {
+    if (tweets[tweet].tweetLike.length>0) {
+      tweetLikes += 1;
+    }
+  }
+  for (const video in videos) {
+    if (videos[video].videoLike.length > 0) {
+      videoLikes += 1;
+    }
+  }
+
+  const totalLikes = videoLikes + commentLikes + tweetLikes;
+
+  const stats = {
+    username: req.user.username,
+    fullname: req.user.fullname,
+    avatar: req.user.avatar,
+    coverImage: req.user.coverImage,
+    totalViews: totalViews,
+    totalSubscribers: totalSubscribers.length,
+    totalVideos: totalVideos.length,
+    totalLikes: totalLikes,
+  };
 
   return res
     .status(200)
-    .json(
-      new ApiResponse(200, stats, "channel stats fetched successfully")
-    );
+    .json(new ApiResponse(200, stats, "channel stats fetched successfully"));
 });
 
 const getChannelVideos = asyncHandler(async (req, res) => {
@@ -150,9 +171,9 @@ const getChannelVideos = asyncHandler(async (req, res) => {
     },
   ]);
 
-  if(videos.length < 1){
-    throw new ApiError(404,"no video found")
-  }
+  // if(videos.length < 1){
+  //   throw new ApiError(404,"no video found")
+  // }
 
   return res
     .status(200)
