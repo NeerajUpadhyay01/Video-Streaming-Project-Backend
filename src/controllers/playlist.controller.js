@@ -21,7 +21,7 @@ const createPlaylist = asyncHandler(async (req, res) => {
   const createdPlaylist = await Playlist.findById(playlist._id);
 
   if (!createdPlaylist) {
-    throw new ApiError(500, "Someth went wrong while creating the playlist");
+    throw new ApiError(500, "Something went wrong while creating the playlist");
   }
 
   return res
@@ -191,7 +191,7 @@ const addVideoToPlaylist = asyncHandler(async (req, res) => {
   } catch (error) {
     throw new ApiError(
       400,
-      "Some thing went wrong while adding the video to the playlist "
+      "Something went wrong while adding the video to the playlist "
     );
   }
 });
@@ -249,7 +249,7 @@ const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
   } catch (error) {
     throw new ApiError(
       400,
-      "Some thing went wrong while removing the video from the playlist "
+      "Something went wrong while removing the video from the playlist "
     );
   }
 });
