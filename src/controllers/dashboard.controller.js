@@ -171,9 +171,9 @@ const getChannelVideos = asyncHandler(async (req, res) => {
     },
   ]);
 
-  // if(videos.length < 1){
-  //   throw new ApiError(404,"no video found")
-  // }
+  if(videos.length < 1){
+    throw new ApiError(404,"no video found")
+  }
 
   return res
     .status(200)
