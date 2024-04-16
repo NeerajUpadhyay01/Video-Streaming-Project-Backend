@@ -5,7 +5,7 @@ import cookieParser from "cookie-parser";
 const app=express();
 
 app.use(cors({
-    origin: 'https://video-streaming-project-backend.vercel.app/',
+    origin: process.env.CORS_ORIGIN,
     credentials: true,
 }))
 
