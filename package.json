@@ -5,16 +5,13 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "dev": "node -r dotenv/config --experimental-json-modules index.js",
-    "build": "webpack"
+    "dev": "node -r dotenv/config --experimental-json-modules index.js"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "nodemon": "^3.1.0",
-    "prettier": "^3.2.5",
-    "webpack": "^5.91.0",
-    "webpack-cli": "^5.1.4"
+    "prettier": "^3.2.5"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",
