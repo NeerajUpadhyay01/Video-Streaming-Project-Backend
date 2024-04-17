@@ -5,7 +5,7 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "dev": "node -r dotenv/config --experimental-json-modules index.js"
+    "dev": "node -r dotenv/config --experimental-json-modules src/index.js"
   },
   "author": "",
   "license": "ISC",
