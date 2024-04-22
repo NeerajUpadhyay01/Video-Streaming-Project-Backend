@@ -35,7 +35,7 @@ const registerUser = asyncHandler(async (req, res) => {
   //check for user creation
   //return res
 
-  const { fullname, email, password, username } = req.body;
+  const { fullname, email, password, username, bio } = req.body;
   //   console.log(req.body);
 
   // if(fullname===""){
@@ -88,6 +88,7 @@ const registerUser = asyncHandler(async (req, res) => {
     email,
     password,
     username: username.toLowerCase(),
+    bio
   });
 
   const createdUser = await User.findById(user._id).select(
