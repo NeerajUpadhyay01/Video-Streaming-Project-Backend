@@ -268,9 +268,9 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 
 const updateAccountDetails = asyncHandler(async (req, res) => {
   //Better approach for updating files in the user, is to make a different endpoint
-  const { fullname, email } = req.body;
+  const { fullname, email, bio } = req.body;
 
-  if (!fullname || !email) {
+  if (!fullname || !email || !bio) {
     throw new ApiError(400, "All fields are required");
   }
 
@@ -280,6 +280,7 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
       $set: {
         fullname,
         email,
+        bio
       },
     },
     {
