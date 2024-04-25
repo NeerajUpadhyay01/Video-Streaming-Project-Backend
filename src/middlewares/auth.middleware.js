@@ -10,7 +10,7 @@ export const verifyJWT = asyncHandler(async (req, _ , next) => {     //res did n
       req.header("Authorization")?.replace("Bearer ", "");
 
     if (!token) {
-      new ApiError(401, "Unauthorized request");
+      throw new ApiError(401, "Unauthorized request");
     }
 
     const decodedToken = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
