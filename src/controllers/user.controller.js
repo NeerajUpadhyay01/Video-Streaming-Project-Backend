@@ -4,7 +4,7 @@ import { User } from "../models/user.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
-import mongoose from "mongoose"
+import mongoose, { isValidObjectId } from "mongoose";
 
 const generateAccessAndRefreshTokens = async (userId) => {
   try {
@@ -88,7 +88,7 @@ const registerUser = asyncHandler(async (req, res) => {
     email,
     password,
     username: username.toLowerCase(),
-    bio
+    bio,
   });
 
   const createdUser = await User.findById(user._id).select(
@@ -171,7 +171,7 @@ const logoutUser = asyncHandler(async (req, res) => {
     req.user._id,
     {
       $unset: {
-        refreshToken: 1,  //this removes the field from document
+        refreshToken: 1, //this removes the field from document
       },
     },
     {
@@ -215,7 +215,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
       throw new ApiError(401, "Refresh token is expired or used");
     }
 
-    const { accessToken, refreshToken:newRefreshToken } =
+    const { accessToken, refreshToken: newRefreshToken } =
       await generateAccessAndRefreshTokens(user._id);
 
     const options = {
@@ -266,6 +266,64 @@ const getCurrentUser = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, req.user, "current user fetched successfully"));
 });
 
+const getUserById = asyncHandler(async (req, res) => {
+  const { userId } = req.query;
+
+  if (!isValidObjectId(userId)) {
+    throw new ApiError(400, "Invalid user id");
+  }
+
+  const user = await User.aggregate([
+    {
+      $match: {
+        _id: new mongoose.Types.ObjectId(userId),
+      },
+    },
+    {
+      $lookup: {
+        from: "subscriptions",
+        localField: "_id",
+        foreignField: "channel",
+        as: "subscribers",
+        pipeline: [
+          {
+            $project: {
+              _id: 1,
+            },
+          },
+        ],
+      },
+    },
+    {
+      $addFields: {
+        subscribers: {
+          $size: "$subscribers",
+        },
+      },
+    },
+    {
+      $project: {
+        avatar: 1,
+        coverImage: 1,
+        username: 1,
+        fullname: 1,
+        bio: 1,
+        createdAt: 1,
+        fullname: 1,
+        subscribers: 1,
+      },
+    },
+  ]);
+
+  if (!user) {
+    throw new ApiError(404, "User does not exist");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, user[0], "user fetched successfully"));
+});
+
 const updateAccountDetails = asyncHandler(async (req, res) => {
   //Better approach for updating files in the user, is to make a different endpoint
   const { fullname, email, bio } = req.body;
@@ -280,7 +338,7 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
       $set: {
         fullname,
         email,
-        bio
+        bio,
       },
     },
     {
@@ -420,6 +478,33 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
     );
 });
 
+const addVideoToHistory = asyncHandler(async (req, res) => {
+  const { videoId } = req.params;
+
+  if (!isValidObjectId(videoId)) {
+    throw new ApiError(400, "Invalid video id");
+  }
+
+  const user = await User.findById(req.user?._id);
+
+  if (!user) {
+    throw new ApiError(404, "User not found");
+  }
+
+ const index = user.watchHistory.findIndex(id => id.toString() === videoId.toString());
+  if (index !== -1) {
+    user.watchHistory.splice(index, 1);
+  }
+  user.watchHistory.push(videoId);
+  await user.save({ validateBeforeSave: false });
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, {}, "Video added in the history")
+    );
+});
+
 const getWatchHistory = asyncHandler(async (req, res) => {
   const user = await User.aggregate([
     {
@@ -486,4 +571,6 @@ export {
   updateUserCoverImage,
   getUserChannelProfile,
   getWatchHistory,
+  getUserById,
+  addVideoToHistory,
 };

@@ -52,14 +52,31 @@ const getUserTweets = asyncHandler(async (req, res) => {
                 as:"tweets",
                 pipeline:[
                     {
+                        $lookup:{
+                            from:"likes",
+                            localField:"_id",
+                            foreignField:"tweet",
+                            as:"likes",
+                        }
+                    },
+                    {
+                        $addFields:{
+                            likes:{
+                                $size:"$likes"
+                            }
+                        }
+                    },
+                    {
                         $project:{
+                            likes:1,
                             content:1,
                             createdAt:1
                         }
                     }
                 ]
             }
-        },{
+        },
+        {
             $project:{
                 tweets:1,
                 username:1,

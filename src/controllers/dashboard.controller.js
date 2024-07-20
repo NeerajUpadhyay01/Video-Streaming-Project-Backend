@@ -169,7 +169,23 @@ const getChannelVideos = asyncHandler(async (req, res) => {
         owner: new mongoose.Types.ObjectId(req.user._id),
       },
     },
+    {
+      $lookup: {
+        from: "users",
+        localField: "owner",
+        foreignField: "_id",
+        as: "owner",
+      },
+    },
+    {
+      $addFields:{
+        owner:{
+          $first:"$owner"
+        }
+      }
+    }
   ]);
+  // console.log(videos)
 
   if(videos.length < 1){
     throw new ApiError(404,"no video found")

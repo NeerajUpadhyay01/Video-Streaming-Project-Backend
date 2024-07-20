@@ -21,10 +21,52 @@ const getVideoComments = asyncHandler(async (req, res) => {
         },
       },
       {
+        $lookup: {
+          from: "users",
+          localField: "owner",
+          foreignField: "_id",
+          as: "owner",
+          pipeline: [
+            {
+              $project: {
+                avatar: 1,
+                username: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $lookup: {
+          from: "likes",
+          localField: "_id",
+          foreignField: "comment",
+          as: "likes",
+          pipeline: [
+            {
+              $project: {
+                _id: 1,
+              },
+            },
+          ],
+        },
+      },
+      {
+        $addFields: {
+          owner: {
+            $first: "$owner",
+          },
+          likes:{
+            $size: "$likes"
+          }
+        },
+      },
+      {
         $project: {
           content: 1,
           owner: 1,
           createdAt: 1,
+          likes:1
         },
       },
     ]);
@@ -34,19 +76,12 @@ const getVideoComments = asyncHandler(async (req, res) => {
       limit,
     };
 
-    const comments = await Comment.aggregatePaginate(
-      aggregate,
-      options
-    );
+    const comments = await Comment.aggregatePaginate(aggregate, options);
 
     return res
       .status(200)
       .json(
-        new ApiResponse(
-          200,
-          comments.docs,
-          "Comments fetched successfully"
-        )
+        new ApiResponse(200, comments.docs, "Comments fetched successfully")
       );
   } catch (error) {
     return res
@@ -93,11 +128,17 @@ const updateComment = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Invalid comment id");
   }
 
+  const { content } = req.body;
+
+  if (!content) {
+    throw new ApiError(400, "content is required");
+  }
+
   const updatedComment = await Comment.findByIdAndUpdate(
     commentId,
     {
       $set: {
-        content: req.body.content,
+        content: content,
       },
     },
     {
