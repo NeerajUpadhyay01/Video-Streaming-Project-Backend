@@ -6,10 +6,10 @@ const app=express();
 
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: "https://video-streaming-project-frontend.vercel.app",
     credentials: true,
-    secure:true,
-    sameSite:"none"
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
