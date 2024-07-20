@@ -146,8 +146,8 @@ const loginUser = asyncHandler(async (req, res) => {
 
   const options = {
     httpOnly: true,
-    secure: true,
-    sameSite: "None",
+    secure: process.env.NODE_ENV === "production",
+    sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
     maxAge: 24 * 60 * 60 * 1000,
   };
 
@@ -183,8 +183,8 @@ const logoutUser = asyncHandler(async (req, res) => {
 
   const options = {
     httpOnly: true,
-    secure: true,
-    sameSite: "None",
+    secure: process.env.NODE_ENV === "production",
+    sameSite:process.env.NODE_ENV === "production" ? "None" : "Lax",
     maxAge: 24 * 60 * 60 * 1000,
   };
 
@@ -224,8 +224,8 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 
     const options = {
       httpOnly: true,
-      secure: true,
-      sameSite: "None",
+      secure: process.env.NODE_ENV === "production",
+      sameSite:process.env.NODE_ENV === "production" ? "None" : "Lax",
       maxAge: 24 * 60 * 60 * 1000,
     };
 
