@@ -75,7 +75,7 @@ const getAllVideos = asyncHandler(async (req, res) => {
         },
       },
       {
-        $unwind:"$owner"
+        $unwind: "$owner",
       }
     );
 
@@ -102,13 +102,13 @@ const getAllVideos = asyncHandler(async (req, res) => {
       },
     });
 
-       const results = await Video.aggregate(pipeline);
-       const videos = results[0].data;
-       const metadata = results[0].metadata[0] || {
-         total: 0,
-         page: 1,
-         limit: parseInt(limit, 10),
-       };
+    const results = await Video.aggregate(pipeline);
+    const videos = results[0].data;
+    const metadata = results[0].metadata[0] || {
+      total: 0,
+      page: 1,
+      limit: parseInt(limit, 10),
+    };
 
     return res
       .status(200)
@@ -399,10 +399,10 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
     .json(new ApiResponse(200, video, "Publish status toggled successfully"));
 });
 
-const getVideos= asyncHandler(async(req,res)=>{
+const getVideos = asyncHandler(async (req, res) => {
   const options = {
-    page:1,
-    limit:10,
+    page: 1,
+    limit: 10,
   };
 
   const videos = await Video.aggregatePaginate(
@@ -436,13 +436,29 @@ const getVideos= asyncHandler(async(req,res)=>{
     options
   );
 
-  
-  if(!videos){
-    throw new ApiError(500,"Something went wrong!!")
+  if (!videos) {
+    throw new ApiError(500, "Something went wrong!!");
   }
 
-  return res.status(200).json(new ApiResponse(200,videos.docs,"Videos fetched successfully"))
-})
+  return res
+    .status(200)
+    .json(new ApiResponse(200, videos.docs, "Videos fetched successfully"));
+});
+
+const increamentViews = asyncHandler(async (req, res) => {
+  const { videoId } = req.params;
+  if (!isValidObjectId(videoId)) {
+    throw new ApiError(400, "Invalid video id");
+  }
+  const video = await Video.findById(videoId);
+
+  video.views += 1; 
+  await video.save({ validateBeforeSave: false });
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, video, "Video views increased successfully"));
+});
 
 export {
   getAllVideos,
@@ -451,5 +467,6 @@ export {
   updateVideo,
   deleteVideo,
   togglePublishStatus,
-  getVideos
+  getVideos,
+  increamentViews,
 };
