@@ -19,34 +19,34 @@ const getAllVideos = asyncHandler(async (req, res) => {
     query,
     sortBy = "createdAt",
     sortType = "asce",
-    userId,
+    // userId,
   } = req.query;
   //TODO: get all videos based on query, sort, pagination
 
   try {
     const pipeline = [];
 
-    if (!userId) {
-      throw new ApiError(400, "User Id not provided");
-    }
+    // if (!userId) {
+    //   throw new ApiError(400, "User Id not provided");
+    // }
 
-    if (!isValidObjectId(userId)) {
-      throw new ApiError(400, "Invalid User Id");
-    }
+    // if (!isValidObjectId(userId)) {
+    //   throw new ApiError(400, "Invalid User Id");
+    // }
 
-    if (userId) {
-      pipeline.push({
-        $match: {
-          owner: new mongoose.Types.ObjectId(userId),
-        },
-      });
-    }
+    // if (userId) {
+    //   pipeline.push({
+    //     $match: {
+    //       owner: new mongoose.Types.ObjectId(userId),
+    //     },
+    //   });
+    // }
 
     if (query) {
       pipeline.push({
         $match: {
           title: {
-            $regex: query && "",
+            $regex: query || "",
             $options: "i",
           },
         },
