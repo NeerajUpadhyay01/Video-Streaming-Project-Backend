@@ -34,35 +34,18 @@ const uploadOnCloudinary = async (localFilePath) => {
 
 const deleteImageFromCloudinary = async (publicUrl) => {
   try {
-    const urlParts = new URL(publicUrl);
-    const pathname = urlParts.pathname;
-
-    // Get filename (last part) and extension
-    const fileName = pathname.split("/").pop(); // e.g. "my-video.mp4"
-    const extension = fileName.split(".").pop().toLowerCase();
-
-    // Determine resource type based on extension
-    let resourceType = "image"; // default
-    const videoExtensions = ["mp4", "mov", "avi", "mkv", "webm"];
-    const rawExtensions = ["pdf", "docx", "zip", "txt"];
-
-    if (videoExtensions.includes(extension)) {
-      resourceType = "video";
-    } else if (rawExtensions.includes(extension)) {
-      resourceType = "raw";
-    }
-
-    // Extract publicId (strip version & extension)
-    const publicIdWithExt = pathname.split("/").slice(2).join("/"); // remove /vxxxx/
-    const publicId = publicIdWithExt.replace(/\.[^/.]+$/, ""); // remove file extension
-
-    const result = await cloudinary.uploader.destroy(publicId, {
-      resource_type: resourceType,
-    });
-
-    return result;
+    const publicId = publicUrl.split(".")[2].split("/").slice(5).join("/");
+    cloudinary.api
+      .delete_resources(publicId)
+      .then((result) => {
+        return result;
+      })
+      .catch((error) => {
+        console.log(`Error 1 while deleting files ${error}`);
+        return null;
+      });
   } catch (error) {
-    console.error("Error deleting from Cloudinary:", error);
+    console.log(`Error 2 while deleting files ${error}`);
     return null;
   }
 };
